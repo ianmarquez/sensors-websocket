@@ -6,5 +6,5 @@ export function connectSensor(id: string, sendMessage: SendMessage): void {
 }
 
 export function disconnectSensor(id: string, sendMessage: SendMessage): void {
-  return sendMessage(JSON.stringify({ command: SensorEvents.CONNECT, id }));
+  return sendMessage(JSON.stringify({ command: SensorEvents.DISCONNECT, id }));
 }
