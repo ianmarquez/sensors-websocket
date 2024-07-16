@@ -3,13 +3,14 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { connectSensor, disconnectSensor } from "@/services/sensors";
-import { useEffect } from "react";
 import { SendMessage } from "react-use-websocket";
+import { Button } from "./ui/button";
 
 interface SensorCardProps {
   id: string;
@@ -17,11 +18,24 @@ interface SensorCardProps {
   connected: boolean;
   unit: string;
   value: string;
+  hidden: boolean;
   sendMessage: SendMessage;
+  toggleVisibility: (id: string) => void;
+  activeVisibility: boolean;
 }
 
 export default function SensorCard(props: SensorCardProps) {
-  const { id, name, connected, value, unit, sendMessage } = props;
+  const {
+    id,
+    name,
+    connected,
+    value,
+    unit,
+    sendMessage,
+    toggleVisibility,
+    hidden,
+    activeVisibility,
+  } = props;
 
   const toggleStatus = (value: boolean) => {
     console.log(value);
@@ -31,9 +45,11 @@ export default function SensorCard(props: SensorCardProps) {
     return connectSensor(id, sendMessage);
   };
 
-  useEffect(() => {
-    console.log(value);
-  }, [value]);
+  if (activeVisibility) {
+    if (!connected) {
+      return;
+    }
+  } else if (hidden) return;
 
   return (
     <Card className="flex flex-col gap-5 p-2">
@@ -56,6 +72,15 @@ export default function SensorCard(props: SensorCardProps) {
         {value ? parseFloat(value).toFixed(2) : 0}
         <span className="text-xl">{unit}</span>
       </CardContent>
+      <CardFooter className="flex justify-end">
+        <Button
+          variant="destructive"
+          className="w-full uppercase rounded-full py-6 px-4 "
+          onClick={() => toggleVisibility(id)}
+        >
+          Hide
+        </Button>
+      </CardFooter>
     </Card>
   );
 }
