@@ -85,7 +85,10 @@ function App() {
           {activeView ? "All" : "Active"}
         </Button>
       </div>
-      <div className="grid-cols-2 sm:grid-cols-3 md:grid-cols-3 grid gap-3 ">
+      <div
+        className="grid-cols-2 sm:grid-cols-3 md:grid-cols-3 grid gap-3 "
+        data-testid="card-grid"
+      >
         {Object.values(sensors).map((sensor) => (
           <SensorCard
             key={sensor.id}
