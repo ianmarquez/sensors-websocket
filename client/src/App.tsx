@@ -13,11 +13,7 @@ function App() {
   const [sensors, setSensors] = useState<SensorsList>({});
   const [hiddenCount, setHiddenCount] = useState<number>(0);
   const [activeView, setActiveView] = useState<boolean>(false);
-  const { sendMessage, lastMessage } = useWebSocket<Sensor>(WEBSOCKET_URL, {
-    onOpen: () => console.log("WebSocket connection opened!"),
-    onClose: () => console.log("WebSocket connection closed!"),
-    onError: (event) => console.error("WebSocket error:", event),
-  });
+  const { sendMessage, lastMessage } = useWebSocket<Sensor>(WEBSOCKET_URL);
 
   function showAll() {
     setSensors((prev) => {

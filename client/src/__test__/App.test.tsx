@@ -1,9 +1,21 @@
-import { describe, expect, it } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
 import App from "@/App";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { act } from "react";
+import { afterEach, describe, expect, it, beforeEach } from "vitest";
+import WS from "vitest-websocket-mock";
+import { Sensors } from "./mockData/App.data";
 
+const WEBSOCKET_URL = import.meta.env.VITE_WEBSOCKET_URL;
+
+let server: WS;
 describe("App", () => {
+  beforeEach(() => {
+    server = new WS(WEBSOCKET_URL);
+  });
+  afterEach(() => {
+    WS.clean();
+  });
+
   it("should have a header", () => {
     render(<App />);
     const header = screen.getByText(/sensors/i);
@@ -16,46 +28,62 @@ describe("App", () => {
     expect(button).toBeVisible();
   });
 
-  it("should have sensor list", () => {
+  it("should have sensor list", async () => {
     render(<App />);
+
+    await server.connected;
+    act(() => {
+      for (const sensor of Sensors) {
+        server.send(sensor);
+      }
+    });
     const cardGrid = screen.getByTestId("card-grid");
-    // 6 by default
-    setTimeout(() => {
-      screen.debug();
-      expect(cardGrid).toBeVisible();
-      expect(cardGrid.querySelectorAll(".text-card-foreground")).length(6);
-    }, 1000);
+    expect(cardGrid).toBeVisible();
+    expect(screen.getAllByTestId("sensor-card")).length(Sensors.length);
   });
 
-  it("should hide inactive sensors when active button is clicked", () => {
+  it("should hide inactive sensors when active button is clicked", async () => {
     render(<App />);
+
+    await server.connected;
+    act(() => {
+      for (const sensor of Sensors) {
+        server.send(sensor);
+      }
+    });
+
     const cardGrid = screen.getByTestId("card-grid");
-    // 6 by default
-    setTimeout(() => {
-      act(() => {
-        const button = screen.getByText(/active/i);
-        expect(cardGrid.querySelectorAll(".text-card-foreground")).length(6);
-        fireEvent.click(button);
-        expect(cardGrid).toBeVisible();
-        expect(cardGrid.querySelectorAll(".text-card-foreground")).length(0);
-      });
-    }, 1000);
+    expect(screen.getAllByTestId("sensor-card")).length(Sensors.length);
+
+    act(() => {
+      const button = screen.getByText(/active/i);
+      fireEvent.click(button);
+    });
+    expect(cardGrid).toBeVisible();
+    expect(cardGrid).toBeEmptyDOMElement();
   });
 
-  it("should show all sensors when all button is clicked", () => {
+  it("should show all sensors when all button is clicked", async () => {
     render(<App />);
+    await server.connected;
+    act(() => {
+      for (const sensor of Sensors) {
+        server.send(sensor);
+      }
+    });
+
     const cardGrid = screen.getByTestId("card-grid");
-    // 6 by default
-    setTimeout(() => {
-      act(() => {
-        const button = screen.getByText(/active/i);
-        expect(cardGrid.querySelectorAll(".text-card-foreground")).length(6);
-        fireEvent.click(button);
-        expect(cardGrid).toBeVisible();
-        expect(cardGrid.querySelectorAll(".text-card-foreground")).length(0);
-        fireEvent.click(screen.getByText(/all/i));
-        expect(cardGrid.querySelectorAll(".text-card-foreground")).length(6);
-      });
-    }, 1000);
+    expect(screen.getAllByTestId("sensor-card")).length(Sensors.length);
+    act(() => {
+      const button = screen.getByText(/active/i);
+      fireEvent.click(button);
+    });
+    expect(cardGrid).toBeEmptyDOMElement();
+
+    act(() => {
+      fireEvent.click(screen.getByText(/all/i));
+    });
+    expect(screen.getAllByTestId("sensor-card")).length(Sensors.length);
+    expect(cardGrid).toBeVisible();
   });
 });

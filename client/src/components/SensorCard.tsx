@@ -51,7 +51,7 @@ export default function SensorCard(props: SensorCardProps) {
   } else if (hidden) return;
 
   return (
-    <Card className="flex flex-col gap-5 p-2">
+    <Card className="flex flex-col gap-5 p-2" data-testid="sensor-card">
       <CardHeader className="flex flex-row gap-3 ">
         <CardTitle className="grow text-xl font-semibold">{name}</CardTitle>
         <CardDescription>
