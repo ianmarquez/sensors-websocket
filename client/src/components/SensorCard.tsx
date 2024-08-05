@@ -12,7 +12,7 @@ import { connectSensor, disconnectSensor } from "@/services/sensors";
 import { SendMessage } from "react-use-websocket";
 import { Button } from "./ui/button";
 
-interface SensorCardProps {
+export interface SensorCardProps {
   id: string;
   name: string;
   connected: boolean;
@@ -38,7 +38,6 @@ export default function SensorCard(props: SensorCardProps) {
   } = props;
 
   const toggleStatus = (value: boolean) => {
-    console.log(value);
     if (!value) {
       return disconnectSensor(id, sendMessage);
     }
@@ -68,12 +67,14 @@ export default function SensorCard(props: SensorCardProps) {
           "text-5xl text-center flex gap-2 justify-center items-center",
           connected ? "text-green-500" : "text-zinc-500",
         )}
+        data-testid="sensor-value"
       >
         {value ? parseFloat(value).toFixed(2) : 0}
         <span className="text-xl">{unit}</span>
       </CardContent>
       <CardFooter className="flex justify-end">
         <Button
+          data-testid="hide-btn"
           variant="destructive"
           className="w-full uppercase rounded-full py-6 px-4 "
           onClick={() => toggleVisibility(id)}

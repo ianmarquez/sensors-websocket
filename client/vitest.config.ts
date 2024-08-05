@@ -26,7 +26,7 @@ export default defineConfig({
     exclude,
     coverage: {
       provider: "v8",
-      exclude: [...exclude, "**/*.test.*"],
+      exclude: [...exclude, "**/*.test.*", "src/__test__/"],
     },
   },
 });
