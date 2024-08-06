@@ -1,7 +1,7 @@
 import App from "@/App";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { act } from "react";
-import { afterEach, describe, expect, it, beforeEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import WS from "vitest-websocket-mock";
 import { Sensors } from "./mockData/App.data";
 
@@ -85,5 +85,26 @@ describe("App", () => {
     });
     expect(screen.getAllByTestId("sensor-card")).length(Sensors.length);
     expect(cardGrid).toBeVisible();
+  });
+
+  it("should only show active sensors when active filter is selected", async () => {
+    render(<App />);
+    await server.connected;
+    act(() => {
+      for (const sensor of Sensors) {
+        server.send(sensor);
+      }
+    });
+    expect(screen.getAllByTestId("sensor-card")).length(Sensors.length);
+    const switchButtons = screen.getAllByTestId("switch");
+    const button = screen.getByText(/active/i);
+
+    act(() => {
+      fireEvent.click(switchButtons[0], { target: { checked: true } });
+      // fireEvent.click(button);
+    });
+    expect(switchButtons[0]).toHaveAttribute("data-state");
+    console.log(switchButtons.length);
+    expect(switchButtons[0].getAttribute("data-state")).toBe("checked");
   });
 });

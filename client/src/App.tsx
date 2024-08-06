@@ -11,9 +11,22 @@ type SensorsList = Record<Sensor["id"], SensorState>;
 
 function App() {
   const [sensors, setSensors] = useState<SensorsList>({});
-  const [hiddenCount, setHiddenCount] = useState<number>(0);
   const [activeView, setActiveView] = useState<boolean>(false);
   const { sendMessage, lastMessage } = useWebSocket<Sensor>(WEBSOCKET_URL);
+
+  function computeHidden(): number {
+    let hiddenCount = 0;
+
+    Object.values(sensors).forEach((sensor) => {
+      if (sensor.hidden) {
+        hiddenCount++;
+      }
+    });
+
+    return hiddenCount;
+  }
+
+  const hiddenCount: number = computeHidden();
 
   function showAll() {
     setSensors((prev) => {
@@ -23,7 +36,6 @@ function App() {
       });
       return newSensors;
     });
-    setHiddenCount(0);
   }
 
   function toggleActiveView() {
@@ -43,6 +55,14 @@ function App() {
         ...newSensor,
         hidden: prev[newSensor.id] ? prev[newSensor.id].hidden : false,
       };
+
+      if (
+        newSensor?.connected === false &&
+        prev[newSensor.id]?.connected === true
+      ) {
+        newSensors[newSensor.id].value = prev[newSensor.id].value;
+      }
+
       return newSensors;
     });
   }, [lastMessage]);
@@ -51,11 +71,6 @@ function App() {
     setSensors((prev) => {
       const newSensors: SensorsList = structuredClone(prev);
       newSensors[id].hidden = !newSensors[id].hidden;
-      if (newSensors[id].hidden) {
-        setHiddenCount((prev) => prev + 1);
-      } else {
-        setHiddenCount((prev) => prev - 1);
-      }
       return newSensors;
     });
   }
